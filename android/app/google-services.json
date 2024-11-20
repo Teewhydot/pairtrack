@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "745744612072",
+    "project_id": "pairtrack",
+    "storage_bucket": "pairtrack.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:745744612072:android:2232236762c5071831675d",
+        "android_client_info": {
+          "package_name": "com.sirteefyapps.pairtrack"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "745744612072-nimem0595se9su1lncho80db5k7i61hg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAiBSzawhp4Dsxads6d1C6b3zIKAzscYlk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "745744612072-nimem0595se9su1lncho80db5k7i61hg.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "745744612072-p7v694ftmceg7vnd6ejo040tqbopseei.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.sirteefyapps.pairtrack"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

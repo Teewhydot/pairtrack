@@ -1,0 +1,70 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:pairtrack/firebase_options.dart';
+import 'package:pairtrack/pair_track/domain/constants/helpers.dart';
+import 'package:pairtrack/pair_track/domain/constants/theme.dart';
+import 'package:pairtrack/pair_track/domain/services/permission_service.dart';
+import 'package:pairtrack/pair_track/presentation/manager/providers/expanded_provider.dart';
+import 'package:pairtrack/pair_track/presentation/manager/providers/google_signin_provider.dart';
+import 'package:pairtrack/pair_track/presentation/manager/providers/location_provider.dart';
+import 'package:pairtrack/pair_track/presentation/manager/providers/pair_manager.dart';
+import 'package:pairtrack/pair_track/presentation/manager/providers/selected_pair_manager.dart';
+import 'package:pairtrack/pair_track/presentation/pages/auth.dart';
+import 'package:pairtrack/pair_track/presentation/pages/pair_track_home.dart';
+
+import 'package:provider/provider.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  runApp(MultiProvider(providers: [
+    ChangeNotifierProvider(create: (context) => LocationProvider()),
+    ChangeNotifierProvider(create: (context) => PermissionService()),
+    ChangeNotifierProvider(create: (context) => GoogleSignInService()),
+    ChangeNotifierProvider(create: (context) => ActivePairJoinerManager()),
+    ChangeNotifierProvider(create: (context) => TrayExpanded()),
+    ChangeNotifierProvider(create: (context) => SelectedGroup()..loadSelectedGroupId()),
+
+  ], child: const MyApp()));
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final userEmail = Provider.of<GoogleSignInService>(context).userEmail;
+    return PlatformProvider(
+      builder: (context) => PlatformTheme(
+          materialLightTheme: AppTheme.lightTheme,
+          materialDarkTheme: AppTheme.darkTheme,
+          themeMode: ThemeMode.system,
+          cupertinoLightTheme: CupertinoThemeData(
+            primaryColor: AppTheme.lightTheme.primaryColor,
+          ),
+          cupertinoDarkTheme: CupertinoThemeData(
+            primaryColor: AppTheme.darkTheme.primaryColor,
+          ),
+          builder: (context) {
+            SizeConfig().init(context);
+            return PlatformApp(
+              material: (_, __) => MaterialAppData(
+                debugShowCheckedModeBanner: false,
+                title: 'PairTrackApp',
+              ),
+              localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
+                DefaultMaterialLocalizations.delegate,
+                DefaultWidgetsLocalizations.delegate,
+                DefaultCupertinoLocalizations.delegate,
+              ],
+              home: userEmail != null ? const PairTrackHome() : const Auth(),
+            );
+          }),
+    );
+  }
+}
