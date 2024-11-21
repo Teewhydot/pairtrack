@@ -32,13 +32,15 @@ class _CustomAvatarContainerState extends State<CustomAvatarContainer> {
     userEmail = Provider.of<GoogleSignInService>(context).userEmail;
     activePair = Provider.of<ActivePairJoinerManager>(context).activePairName;
     joinerPhotoLink = firebaseGroupFunctions.getJoinerPhotoLink(
-        activePair ?? 'test', userEmail, context);
+        activePair, userEmail, context);
   }
 
   @override
   Widget build(BuildContext context) {
     final userDetails = Provider.of<GoogleSignInService>(context);
     final location = Provider.of<LocationProvider>(context, listen: false);
+    final memberCount =
+        Provider.of<ActivePairJoinerManager>(context).numOfMembers;
 
     return Center(
       child: Container(
@@ -76,31 +78,32 @@ class _CustomAvatarContainerState extends State<CustomAvatarContainer> {
                 ),
               ),
             ),
-            FutureBuilder(
-                future: joinerPhotoLink,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const SizedBox();
-                  }
-                  if (snapshot.hasError) {
-                    return Container();
-                  }
-                  return Padding(
-                    padding: const EdgeInsets.only(left: 2, right: 2),
-                    child: CircleAvatar(
-                      radius: 20,
-                      child: ClipOval(
-                        child: CachedNetworkImage(
-                          imageUrl: snapshot.data!,
-                          placeholder: (context, url) =>
-                              PlatformCircularProgressIndicator(),
-                          errorWidget: (context, url, error) =>
-                              Icon(context.platformIcons.error),
+            if (memberCount == 2)
+              FutureBuilder(
+                  future: joinerPhotoLink,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const SizedBox();
+                    }
+                    if (snapshot.hasError) {
+                      return Container();
+                    }
+                    return Padding(
+                      padding: const EdgeInsets.only(left: 2, right: 2),
+                      child: CircleAvatar(
+                        radius: 20,
+                        child: ClipOval(
+                          child: CachedNetworkImage(
+                            imageUrl: snapshot.data!,
+                            placeholder: (context, url) =>
+                                PlatformCircularProgressIndicator(),
+                            errorWidget: (context, url, error) =>
+                                Icon(context.platformIcons.error),
+                          ),
                         ),
                       ),
-                    ),
-                  );
-                }),
+                    );
+                  }),
           ],
         ),
       ),

@@ -37,6 +37,26 @@ class GoogleSignInService extends ChangeNotifier {
   GoogleSignInService() {
     _loadUserDetails();
   }
+  Future<void> signInSilently() async {
+    try {
+      showLoading = true;
+      notifyListeners();
+      _user = await _googleSignIn.signInSilently();
+      showLoading = false;
+      notifyListeners();
+    } catch (error) {
+      _errorMessage = error.toString();
+      showLoading = false;
+      notifyListeners();
+    }
+  }
+  void renderButton() {
+    _googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount? account) {
+      _user = account;
+      notifyListeners();
+    });
+    _googleSignIn.signInSilently();
+  }
 
   Future<void> signInWithGoogle() async {
     try {

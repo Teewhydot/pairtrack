@@ -101,7 +101,10 @@ class FirebaseGroupFunctions {
     }
   }
 
-  Future<LatLng?> getLocationOfJoiner(String pairName, pairCreatorEmail) async {
+  Future<LatLng> getLocationOfJoiner(String? pairName, pairCreatorEmail,bool activePairMemberJoined) async {
+    if (pairName == null || activePairMemberJoined == false) {
+      return LatLng(0, 0);
+    }
     final result = await fireStore
         .collection('Pairs')
         .doc(pairCreatorEmail)
@@ -118,7 +121,11 @@ class FirebaseGroupFunctions {
   }
 
   Future<String?> getJoinerPhotoLink(
-      String pairName, pairCreatorEmail, BuildContext context) {
+      String? pairName, pairCreatorEmail, BuildContext context) {
+
+    if (pairName == null) {
+      return Future.value(null);
+    }
     // go into the members collection and loop through the members and check
     // which email is not the same as the creator email meaning
     // the email is a joiner then grab the photo url of that joiner

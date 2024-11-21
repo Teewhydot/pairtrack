@@ -5,8 +5,7 @@
     If you are serving your web app in a path other than the root, change the
     href value below to reflect the base path you are serving from.
 
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
+    The path provided below has to start and end with a slash "/" in order for    it to work correctly.
 
     For more details:
     * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
@@ -14,8 +13,12 @@
     This is a placeholder for base href that will be replaced by the value of
     the `--base-href` argument provided to `flutter build`.
   -->
-  <base href="$FLUTTER_BASE_HREF">
 
+  <script
+          src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBzpc2Z3otBR3igZxyGhgCva7oYEjWDtzo&libraries=drawing,visualization,places">
+  </script>
+  <base href="$FLUTTER_BASE_HREF">
+  <meta name="google-signin-client_id" content="745744612072-hga7qedhomb748kb30pq6c118r4ivnc4.apps.googleusercontent.com">
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="A new Flutter project.">

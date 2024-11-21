@@ -30,12 +30,23 @@ void main() async {
     ChangeNotifierProvider(create: (context) => TrayExpanded()),
     ChangeNotifierProvider(create: (context) => SelectedGroup()..loadSelectedGroupId()),
 
-  ], child: const MyApp()));
+  ], child: const Home()));
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class Home extends StatefulWidget {
+  const Home({super.key});
 
+  @override
+  State<Home> createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
+  @override
+  void initState() {
+    super.initState();
+    final googleService = Provider.of<GoogleSignInService>(context, listen: false);
+    googleService.renderButton();
+  }
   @override
   Widget build(BuildContext context) {
     final userEmail = Provider.of<GoogleSignInService>(context).userEmail;

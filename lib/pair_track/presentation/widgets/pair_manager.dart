@@ -204,6 +204,7 @@ class _PairsManagerState extends State<PairsManager>
                                               .toggleExpanded();
                                         }
                                         pairManager.updateActivePair(group.id);
+                                        pairManager.updateNumOfMembersForActivePair(members.length);
                                       },
                                       title: Text(group.id, style: const TextStyle(color: Colors.black)),
                                       subtitle: Column(

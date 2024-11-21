@@ -31,19 +31,12 @@ class _PairTrackHomeState extends State<PairTrackHome> {
   FirebaseGroupFunctions firebaseGroupFunctions = FirebaseGroupFunctions();
 
   String? mapStyle, activePairName, userEmail;
+  int activePairMemberCount = 1;
   BitmapDescriptor? creatorMarker;
   BitmapDescriptor? joinerMarker;
   Set<Marker> markers = {};
 
   LatLng joinerPosition = const LatLng(0, 0);
-  LatLng stringToLatLng(String location) {
-    final parts =
-        location.replaceAll('LatLng(', '').replaceAll(')', '').split(',');
-    final lat = double.parse(parts[0]);
-    final lng = double.parse(parts[1]);
-    return LatLng(lat, lng);
-  }
-
   Future<void> _setCreatorMarker(String? photoLink) async {
     final marker = await _createCustomMarker(photoLink);
     setState(() {
@@ -118,18 +111,48 @@ class _PairTrackHomeState extends State<PairTrackHome> {
   @override
   void didChangeDependencies() async {
     super.didChangeDependencies();
+    final location = Provider.of<LocationProvider>(context);
     activePairName =
         Provider.of<ActivePairJoinerManager>(context).activePairName;
+    activePairMemberCount =
+        Provider.of<ActivePairJoinerManager>(context).numOfMembers;
     userEmail = Provider.of<GoogleSignInService>(context).userEmail;
     // create marker for the joiner using their photo
     joinerPosition = (await firebaseGroupFunctions.getLocationOfJoiner(
-            activePairName!, userEmail)) ??
-        const LatLng(0, 0);
+        activePairName, userEmail, activePairMemberCount == 2));
 
     if (joinerPosition != const LatLng(0, 0)) {
       final joinerPhotoLink = await firebaseGroupFunctions.getJoinerPhotoLink(
           activePairName ?? 'test', userEmail, context);
       _setJoinerMarker(joinerPhotoLink);
+      setState(() {
+        markers = {
+          Marker(
+            markerId: const MarkerId('creator'),
+            position: LatLng(location.lat, location.long),
+            icon: creatorMarker ?? BitmapDescriptor.defaultMarker,
+          ),
+          if (joinerPosition != const LatLng(0.0, 0.0) &&
+              activePairName!.isNotEmpty)
+            Marker(
+              markerId: const MarkerId('joiner'),
+              position: joinerPosition,
+              icon: joinerMarker ?? BitmapDescriptor.defaultMarker,
+            ),
+        };
+        print('creator marker and joiner marker');
+      });
+    } else {
+      setState(() {
+        print('only creator marker');
+        markers = {
+          Marker(
+            markerId: const MarkerId('creator'),
+            position: LatLng(location.lat, location.long),
+            icon: creatorMarker ?? BitmapDescriptor.defaultMarker,
+          ),
+        };
+      });
     }
   }
 
@@ -138,7 +161,6 @@ class _PairTrackHomeState extends State<PairTrackHome> {
     final location = Provider.of<LocationProvider>(context);
     final pairManager = Provider.of<ActivePairJoinerManager>(context);
     final expanded = Provider.of<TrayExpanded>(context).isExpanded;
-
     setMapStyle();
     return PlatformScaffold(
       material: (context, platform) => MaterialScaffoldData(
@@ -162,13 +184,15 @@ class _PairTrackHomeState extends State<PairTrackHome> {
                       position: LatLng(location.lat, location.long),
                       icon: creatorMarker ?? BitmapDescriptor.defaultMarker,
                     ),
-                    if (joinerPosition != const LatLng(0.0, 0.0))
+                    if (activePairMemberCount == 2 &&
+                        activePairName!.isNotEmpty)
                       Marker(
                         markerId: const MarkerId('joiner'),
                         position: joinerPosition,
                         icon: joinerMarker ?? BitmapDescriptor.defaultMarker,
                       ),
                   },
+                  mapType: MapType.normal,
                 )
               : Center(child: PlatformCircularProgressIndicator()),
           Positioned(

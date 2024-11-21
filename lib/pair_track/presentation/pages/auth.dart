@@ -31,7 +31,17 @@ class _AuthState extends State<Auth> {
                     child: const Text('Sign In With Google'),
                     onPressed: () async {
                       await googleSignInService
-                          .signInWithGoogle();
+                          .signInWithGoogle().whenComplete((){
+                            if(googleSignInService.errorMessage == null){
+                              Navigator.push(
+                                context,
+                                platformPageRoute(
+                                  context: context,
+                                  builder: (context) => const PairTrackHome(),
+                                ),
+                              );
+                            }
+                      });
                     },
                   ),
           ],
