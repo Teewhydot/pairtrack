@@ -29,7 +29,4 @@ class PermissionService extends ChangeNotifier {
     notifyListeners();
   }
 
-   Future<void> openAppSettings() async {
-     await openAppSettings();
-   }
 }

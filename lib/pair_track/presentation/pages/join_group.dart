@@ -99,8 +99,8 @@ class _JoinPairState extends State<JoinPair> {
                         if (_emailController.text.isNotEmpty &&
                             _codeController.text.isNotEmpty) {
                           if (_emailController.text.trim() == userEmail) {
-                            showWarningDialog(
-                                'You cannot join a pair you created', context);
+                            showCustomPlatformDialog(
+                                'You cannot join a pair you created','Error', context);
                             stopLoading();
                           } else {
                             startLoading();
@@ -118,8 +118,8 @@ class _JoinPairState extends State<JoinPair> {
                             });
                           }
                         } else {
-                          showWarningDialog(
-                              'Please enter both email and code', context);
+                          showCustomPlatformDialog(
+                              'Please enter both email and code','Error', context);
                           stopLoading();
                         }
                       },

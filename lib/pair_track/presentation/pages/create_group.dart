@@ -17,6 +17,7 @@ class _CreatePairState extends State<CreatePair> {
   final TextEditingController _pairNameController = TextEditingController();
   FirebaseGroupFunctions firebaseService = FirebaseGroupFunctions();
   bool loading = false;
+
   void startLoading() {
     setState(() {
       loading = true;
@@ -32,7 +33,6 @@ class _CreatePairState extends State<CreatePair> {
   @override
   Widget build(BuildContext context) {
     final location = Provider.of<LocationProvider>(context);
-
     return PlatformScaffold(
       appBar: PlatformAppBar(
         title: const Text('Create Pair'),
@@ -65,38 +65,41 @@ class _CreatePairState extends State<CreatePair> {
               loading
                   ? PlatformCircularProgressIndicator()
                   : PlatformElevatedButton(
-                      child: const Text('Create Pair'),
-                      onPressed: () {
-                        if (_pairNameController.text.isNotEmpty) {
-                          startLoading();
-                          firebaseService
-                              .createGroup(_pairNameController.text.trim(),
-                                  context, LatLng(location.lat, location.long))
-                              .whenComplete(() {
-                            if (context.mounted) {
-                              stopLoading();
+                child: const Text('Create Pair'),
+                onPressed: () {
+                  if (_pairNameController.text.isNotEmpty) {
+                    startLoading();
+                    firebaseService
+                        .createGroup(
+                        _pairNameController.text.trim(),
+                        context,
+                        LatLng(location.lat, location.long))
+                        .whenComplete(() {
+                      if (context.mounted) {
+                        stopLoading();
+                        Navigator.pop(context);
+                      }
+                    });
+                  } else {
+                    showPlatformDialog(
+                      context: context,
+                      builder: (_) => PlatformAlertDialog(
+                        title: const Text('Error'),
+                        content:
+                        const Text('Please enter a pair name'),
+                        actions: <Widget>[
+                          PlatformDialogAction(
+                            child: const Text('OK'),
+                            onPressed: () {
                               Navigator.pop(context);
-                            }
-                          });
-                        } else {
-                          showPlatformDialog(
-                            context: context,
-                            builder: (_) => PlatformAlertDialog(
-                              title: const Text('Error'),
-                              content: const Text('Please enter a pair name'),
-                              actions: <Widget>[
-                                PlatformDialogAction(
-                                  child: const Text('OK'),
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                ),
-                              ],
-                            ),
-                          );
-                        }
-                      },
-                    ),
+                            },
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                },
+              ),
             ],
           ),
         ),

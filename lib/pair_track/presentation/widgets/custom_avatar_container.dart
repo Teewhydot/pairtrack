@@ -13,8 +13,11 @@ import 'package:provider/provider.dart';
 import '../manager/providers/location_provider.dart';
 
 class CustomAvatarContainer extends StatefulWidget {
+  final LatLng? joinerPosition;
+
   const CustomAvatarContainer({
     super.key,
+    this.joinerPosition,
   });
   @override
   State<CustomAvatarContainer> createState() => _CustomAvatarContainerState();
@@ -32,7 +35,7 @@ class _CustomAvatarContainerState extends State<CustomAvatarContainer> {
     userEmail = Provider.of<GoogleSignInService>(context).userEmail;
     activePair = Provider.of<ActivePairJoinerManager>(context).activePairName;
     joinerPhotoLink = firebaseGroupFunctions.getJoinerPhotoLink(
-        activePair, userEmail, context);
+        activePair, userEmail);
   }
 
   @override
@@ -88,17 +91,22 @@ class _CustomAvatarContainerState extends State<CustomAvatarContainer> {
                     if (snapshot.hasError) {
                       return Container();
                     }
-                    return Padding(
-                      padding: const EdgeInsets.only(left: 2, right: 2),
-                      child: CircleAvatar(
-                        radius: 20,
-                        child: ClipOval(
-                          child: CachedNetworkImage(
-                            imageUrl: snapshot.data!,
-                            placeholder: (context, url) =>
-                                PlatformCircularProgressIndicator(),
-                            errorWidget: (context, url, error) =>
-                                Icon(context.platformIcons.error),
+                    return GestureDetector(
+                      onTap: () {
+                        location.cameraToPosition(widget.joinerPosition!);
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.only(left: 2, right: 2),
+                        child: CircleAvatar(
+                          radius: 20,
+                          child: ClipOval(
+                            child: CachedNetworkImage(
+                              imageUrl: snapshot.data!,
+                              placeholder: (context, url) =>
+                                  PlatformCircularProgressIndicator(),
+                              errorWidget: (context, url, error) =>
+                                  Icon(context.platformIcons.error),
+                            ),
                           ),
                         ),
                       ),

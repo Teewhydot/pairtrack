@@ -42,11 +42,11 @@ extension DarkMode on BuildContext {
 }
 
 
-void showWarningDialog(String message, BuildContext context){
+void showCustomPlatformDialog(String message,title, BuildContext context){
   showPlatformDialog(
     context: context,
     builder: (_) => PlatformAlertDialog(
-      title: const Text('Error'),
+      title: Text(title),
       content:
        Text(message),
       actions: <Widget>[

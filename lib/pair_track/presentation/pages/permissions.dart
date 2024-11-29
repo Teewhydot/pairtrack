@@ -62,13 +62,11 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
                 subtitle: permission.isNotificationPermissionGranted
                     ? const Text(
                         'You have granted consent to PairTrack to send you notifications.')
-                    : const Text('Allow PairTrack to send you chat notifications'),
+                    : const Text(
+                        'Allow PairTrack to send you chat notifications'),
                 trailing: PlatformSwitch(
                   value: permission.notificationPermissionGranted,
                   onChanged: (value) async {
-                    if (permission.isNotificationPermissionGranted) {
-                      await permissionService.openAppSettings();
-                    }
                     await permissionService.requestNotificationPermission();
                   },
                 ),
@@ -78,13 +76,7 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
           PlatformElevatedButton(
               child: const Text('Continue'),
               onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  platformPageRoute(
-                    context: context,
-                    builder: (context) => const PairTrackHome(),
-                  ),
-                );
+                Navigator.pop(context);
               }),
         ],
       ),

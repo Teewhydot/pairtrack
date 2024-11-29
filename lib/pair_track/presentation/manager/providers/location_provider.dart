@@ -5,8 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:location/location.dart';
+import 'package:pairtrack/pair_track/domain/services/firebase_service.dart';
+import 'package:pairtrack/pair_track/presentation/manager/providers/pair_manager.dart';
+import 'package:provider/provider.dart';
+
+import 'google_signin_provider.dart';
 
 class LocationProvider extends ChangeNotifier {
+  FirebaseGroupFunctions firebaseGroupFunctions = FirebaseGroupFunctions();
   double _latitude = 0.0;
   double _longitude = 0.0;
   String locationName = '';
@@ -38,8 +44,9 @@ class LocationProvider extends ChangeNotifier {
   double get long => _longitude;
   bool get spinner => _showLocationSpinner;
 
-  Future<void> fetchLocationUpdates() async {
-
+  Future<void> getLocationAndUpdates(BuildContext context) async {
+    final user = Provider.of<GoogleSignInService>(context, listen: false);
+    final pair = Provider.of<ActivePairJoinerManager>(context, listen: false);
     try {
       Location location = Location();
       bool serviceEnabled;
@@ -68,23 +75,22 @@ class LocationProvider extends ChangeNotifier {
       notifyListeners();
       location.onLocationChanged.listen((LocationData newLocation) {
         if (newLocation.latitude != null && newLocation.longitude != null) {
+          firebaseGroupFunctions.updateLocation(
+              pair.activePairName,
+              user.userEmail,
+              LatLng(newLocation.latitude!, newLocation.longitude!));
           _latitude = newLocation.latitude!;
           _longitude = newLocation.longitude!;
-          _cameraPosition = CameraPosition(
-            target: LatLng(_latitude, _longitude),
-            zoom: 15,
-          );
           notifyListeners();
         }
       });
       location.enableBackgroundMode(enable: true);
       location.changeSettings(
         accuracy: LocationAccuracy.high,
-        interval: 100,
-        distanceFilter: 1,
+        interval: 5000, // 5 seconds
+        distanceFilter: 0, // Update on every movement
       );
     } catch (e) {
-      print(e);
     }
   }
 
