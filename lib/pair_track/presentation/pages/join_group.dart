@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:pairtrack/custom_exceptions.dart';
 import 'package:pairtrack/pair_track/domain/constants/helpers.dart';
 import 'package:pairtrack/pair_track/domain/services/firebase_service.dart';
 import 'package:pairtrack/pair_track/presentation/manager/providers/google_signin_provider.dart';
@@ -41,7 +42,7 @@ class _JoinPairState extends State<JoinPair> {
 
   @override
   Widget build(BuildContext context) {
-    final location = Provider.of<LocationProvider>(context);
+    final location = Provider.of<UserLocationProvider>(context);
     final userEmail = Provider.of<GoogleSignInService>(context).userEmail;
     return PlatformScaffold(
       appBar: PlatformAppBar(
@@ -100,26 +101,44 @@ class _JoinPairState extends State<JoinPair> {
                             _codeController.text.isNotEmpty) {
                           if (_emailController.text.trim() == userEmail) {
                             showCustomPlatformDialog(
-                                'You cannot join a pair you created','Error', context);
+                                'You cannot join a pair you created',
+                                'Error',
+                                context);
                             stopLoading();
                           } else {
                             startLoading();
-                            firebaseService
-                                .joinGroup(
-                                    _codeController.text.trim(),
-                                    _emailController.text.trim(),
-                                    context,
-                                    LatLng(location.lat, location.long))
-                                .whenComplete(() {
-                              if (context.mounted) {
-                                stopLoading();
-                                Navigator.pop(context);
-                              }
-                            });
+
+                            try {
+                              firebaseService
+                                  .joinGroup(
+                                      _codeController.text.trim(),
+                                      _emailController.text.trim(),
+                                      context,
+                                      LatLng(location.lat, location.long));
+                              //     .whenComplete(() {
+                              //   if (context.mounted) {
+                              //     stopLoading();
+                              //     Navigator.pop(context);
+                              //   }
+                              // });
+                            } on PairFullException catch (e) {
+                              showCustomPlatformDialog(
+                                  e.message, 'Error', context);
+                              stopLoading();
+                            } on PairNotFoundException catch (e) {
+                              showCustomPlatformDialog(
+                                  e.message, 'Error', context);
+                            } on Exception catch (e) {
+                              showCustomPlatformDialog(
+                                  e.toString(), 'Error', context);
+                              stopLoading();
+                            }
                           }
                         } else {
                           showCustomPlatformDialog(
-                              'Please enter both email and code','Error', context);
+                              'Please enter both email and code',
+                              'Error',
+                              context);
                           stopLoading();
                         }
                       },

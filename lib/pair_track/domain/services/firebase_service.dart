@@ -274,6 +274,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:pairtrack/custom_exceptions.dart';
 import 'package:pairtrack/pair_track/presentation/manager/providers/google_signin_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -282,98 +283,108 @@ class FirebaseGroupFunctions {
 
   Future<void> createGroup(
       String pairName, BuildContext context, LatLng location) async {
-    final user = Provider.of<GoogleSignInService>(context, listen: false);
-    final userEmail = user.userEmail;
-    final userPhotoUrl = user.userPhotoUrl;
-    final now = DateTime.now();
+    try {
+      final user = Provider.of<GoogleSignInService>(context, listen: false);
+      final userEmail = user.userEmail;
+      final userPhotoUrl = user.userPhotoUrl;
+      final now = DateTime.now();
 
-    // Data for the group document
-    final groupData = {
-      'created_at': now,
-      'created_by': userEmail,
-      'creator_photo_url': userPhotoUrl,
-    };
+      // Data for the group document
+      final groupData = {
+        'created_at': now,
+        'created_by': userEmail,
+        'creator_photo_url': userPhotoUrl,
+      };
 
-    // Data for the member document
-    final memberData = {
-      'joined_at': now,
-      'joined_by': userEmail,
-      'photo_url': userPhotoUrl,
-      'current_latitude': location.latitude,
-      'current_longitude': location.longitude,
-    };
+      // Data for the member document
+      final memberData = {
+        'joined_at': now,
+        'joined_by': userEmail,
+        'photo_url': userPhotoUrl,
+        'current_latitude': location.latitude,
+        'current_longitude': location.longitude,
+      };
 
-    // Reference to the group document
-    final groupDoc = fireStore
-        .collection('Pairs')
-        .doc(userEmail)
-        .collection('pairs')
-        .doc(pairName);
+      // Reference to the group document
+      final groupDoc = fireStore
+          .collection('Pairs')
+          .doc(userEmail)
+          .collection('pairs')
+          .doc(pairName);
 
-    // Create the group document
-    await groupDoc.set(groupData);
+      // Create the group document
+      await groupDoc.set(groupData);
 
-    // Add the creator as a member
-    await groupDoc.collection('members').doc(userEmail).set(memberData);
+      // Add the creator as a member
+      await groupDoc.collection('members').doc(userEmail).set(memberData);
+    } on Exception catch (e) {
+      throw Exception('Failed to create pair: $e');
+    }
   }
 
   Future<void> joinGroup(String pairName, String groupCreatorEmail,
       BuildContext context, LatLng location) async {
-    final user = Provider.of<GoogleSignInService>(context, listen: false);
-    final userEmail = user.userEmail;
-    final userPhotoUrl = user.userPhotoUrl;
-    final now = DateTime.now();
+    try {
+      final user = Provider.of<GoogleSignInService>(context, listen: false);
+      final userEmail = user.userEmail;
+      final userPhotoUrl = user.userPhotoUrl;
+      final now = DateTime.now();
 
-    // Check if the group is full and if the pair exists
-    if (await _isGroupFull(pairName, groupCreatorEmail) ||
-        (await _doesPairExist(pairName, groupCreatorEmail) == false)) {
-      print('Pair doesnt exist so user cant join');
-      return;
-    }
+      // Check if the group is full and if the pair exists
+      if (await _isGroupFull(pairName, groupCreatorEmail)) {
+        throw PairFullException('This pair is full');
+      }
 
-    // Data for the member document
-    final memberData = {
-      'joined_at': now,
-      'joined_by': userEmail,
-      'photo_url': userPhotoUrl,
-      'current_latitude': location.latitude,
-      'current_longitude': location.longitude,
-    };
+      if (!(await _doesPairExist(pairName, groupCreatorEmail))) {
+        throw PairNotFoundException('The pair does not exist.');
+      }
 
-    // Reference to the group document
-    final groupDoc = fireStore
-        .collection('Pairs')
-        .doc(groupCreatorEmail)
-        .collection('pairs')
-        .doc(pairName);
+      // Data for the member document
+      final memberData = {
+        'joined_at': now,
+        'joined_by': userEmail,
+        'photo_url': userPhotoUrl,
+        'current_latitude': location.latitude,
+        'current_longitude': location.longitude,
+      };
 
-    // Add the joiner as a member
-    await groupDoc.collection('members').doc(userEmail).set(memberData);
+      // Reference to the group document
+      final groupDoc = fireStore
+          .collection('Pairs')
+          .doc(groupCreatorEmail)
+          .collection('pairs')
+          .doc(pairName);
 
-    // Add the group to the joiner's list of pairs
-    await fireStore
-        .collection('Pairs')
-        .doc(userEmail)
-        .collection('pairs')
-        .doc(pairName)
-        .set({
-      'created_at': now,
-      'created_by': groupCreatorEmail,
-      'creator_photo_url':
-          await _getPhotoUrlOfGroupCreator(pairName, groupCreatorEmail),
-    });
+      // Add the joiner as a member
+      await groupDoc.collection('members').doc(userEmail).set(memberData);
 
-    // Copy the members from the group creator to the joiner
-    final members = await groupDoc.collection('members').get();
-    for (final member in members.docs) {
+      // Add the group to the joiner's list of pairs
       await fireStore
           .collection('Pairs')
           .doc(userEmail)
           .collection('pairs')
           .doc(pairName)
-          .collection('members')
-          .doc(member['joined_by'])
-          .set(member.data());
+          .set({
+        'created_at': now,
+        'created_by': groupCreatorEmail,
+        'creator_photo_url':
+            await _getPhotoUrlOfGroupCreator(pairName, groupCreatorEmail),
+      });
+
+      // Copy the members from the group creator to the joiner
+      final members = await groupDoc.collection('members').get();
+      for (final member in members.docs) {
+        await fireStore
+            .collection('Pairs')
+            .doc(userEmail)
+            .collection('pairs')
+            .doc(pairName)
+            .collection('members')
+            .doc(member['joined_by'])
+            .set(member.data());
+      }
+    } on Exception catch (e) {
+      throw Exception('Failed to join group: $e');
     }
   }
 
@@ -431,7 +442,6 @@ class FirebaseGroupFunctions {
         .doc(pairName)
         .delete();
   }
-
   Future<void> updateLocation(
       String? pairName, String? pairCreatorEmail, LatLng loc) async {
     if (pairName == null || pairCreatorEmail == null) return;
@@ -445,14 +455,12 @@ class FirebaseGroupFunctions {
         .doc(pairCreatorEmail);
 
     try {
-      // Check if the document exists
       if ((await docRef.get()).exists) {
-        // Update the location
         await docRef.update({
           'current_latitude': loc.latitude,
           'current_longitude': loc.longitude,
         });
-        // Update the location for other members
+
         final members = await fireStore
             .collection('Pairs')
             .doc(pairCreatorEmail)
@@ -474,11 +482,11 @@ class FirebaseGroupFunctions {
             'current_longitude': loc.longitude,
           });
         }
-      } else {}
-    } catch (e) {
-      if (kDebugMode) {
-        print('Failed to update location: $e');
+      } else {
+        throw LocationUpdateException('Document does not exist.');
       }
+    } catch (e) {
+      throw LocationUpdateException('Failed to update location: $e');
     }
   }
 

@@ -69,7 +69,7 @@ class _PairTrackHomeState extends State<PairTrackHome> {
     super.initState();
     final userDetails =
         Provider.of<GoogleSignInService>(context, listen: false);
-    final location = Provider.of<LocationProvider>(context, listen: false);
+    final location = Provider.of<UserLocationProvider>(context, listen: false);
     location.getLocationAndUpdates(context);
     _setCreatorMarker(userDetails.userPhotoUrl);
   }
@@ -77,7 +77,6 @@ class _PairTrackHomeState extends State<PairTrackHome> {
   @override
   void didChangeDependencies() async {
     super.didChangeDependencies();
-    final location = Provider.of<LocationProvider>(context);
     activePairName =
         Provider.of<ActivePairJoinerManager>(context).activePairName;
     activePairMemberCount =
@@ -97,38 +96,12 @@ class _PairTrackHomeState extends State<PairTrackHome> {
       final joinerPhotoLink = await firebaseGroupFunctions.getJoinerPhotoLink(
           activePairName ?? 'test', userEmail);
       _setJoinerMarker(joinerPhotoLink);
-      setState(() {
-        markers = {
-          Marker(
-            markerId: const MarkerId('creator'),
-            position: LatLng(location.lat, location.long),
-            icon: creatorMarker ?? BitmapDescriptor.defaultMarker,
-          ),
-          if (joinerPosition != const LatLng(0.0, 0.0) &&
-              activePairName!.isNotEmpty)
-            Marker(
-              markerId: const MarkerId('joiner'),
-              position: joinerPosition,
-              icon: joinerMarker ?? BitmapDescriptor.defaultMarker,
-            ),
-        };
-      });
-    } else {
-      setState(() {
-        markers = {
-          Marker(
-            markerId: const MarkerId('creator'),
-            position: LatLng(location.lat, location.long),
-            icon: creatorMarker ?? BitmapDescriptor.defaultMarker,
-          ),
-        };
-      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final location = Provider.of<LocationProvider>(context);
+    final location = Provider.of<UserLocationProvider>(context);
     final pairManager = Provider.of<ActivePairJoinerManager>(context);
     final expanded = Provider.of<TrayExpanded>(context).isExpanded;
     setMapStyle();

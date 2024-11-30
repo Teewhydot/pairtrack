@@ -32,7 +32,7 @@ void main() async {
   );
 
   runApp(MultiProvider(providers: [
-    ChangeNotifierProvider(create: (context) => LocationProvider()),
+    ChangeNotifierProvider(create: (context) => UserLocationProvider()),
     ChangeNotifierProvider(create: (context) => PermissionService()),
     ChangeNotifierProvider(create: (context) => GoogleSignInService()),
     ChangeNotifierProvider(create: (context) => ActivePairJoinerManager()),
