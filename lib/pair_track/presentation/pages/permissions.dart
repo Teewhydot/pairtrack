@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:pairtrack/pair_track/domain/services/permission_service.dart';
-import 'package:pairtrack/pair_track/presentation/pages/pair_track_home.dart';
+import 'package:pairtrack/pair_track/presentation/widgets/permissions_widget.dart';
 import 'package:provider/provider.dart';
 
 class PermissionsScreen extends StatefulWidget {
@@ -39,7 +39,16 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
                 trailing: PlatformSwitch(
                   value: permission.locationPermissionGranted,
                   onChanged: (value) async {
-                    await permissionService.requestLocationPermission();
+                    showPermissionDialog(context,
+                        permission: 'Location Permission',
+                        explanation:
+                            'PairTrack needs your permission to access your device location in order to share your live location with your trusted pair',
+                        onGrant: () async {
+                      Navigator.pop(context);
+                      await permissionService.requestLocationPermission();
+                    }, onDeny: () {
+                      Navigator.pop(context);
+                    });
                   },
                 ),
               ),
@@ -51,8 +60,17 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
                 trailing: PlatformSwitch(
                   value: permission.backgroundLocationPermissionGranted,
                   onChanged: (value) async {
-                    await permissionService
-                        .requestBackgroundLocationPermission();
+                    showPermissionDialog(context,
+                        permission: 'Background Location Permission',
+                        explanation:
+                            'PairTrack needs your permission to access your device location in the background in order to share your live location with your trusted pair',
+                        onGrant: () async {
+                      Navigator.pop(context);
+                      await permissionService
+                          .requestBackgroundLocationPermission();
+                    }, onDeny: () {
+                      Navigator.pop(context);
+                    });
                   },
                 ),
               ),
@@ -67,9 +85,18 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
                 trailing: PlatformSwitch(
                   value: permission.notificationPermissionGranted,
                   onChanged: (value) async {
-                    await permissionService.requestNotificationPermission();
-                  },
-                ),
+                    showPermissionDialog(context,
+                        permission: 'Notification Permission',
+                        explanation:
+                        'PairTrack needs your permission to send you notifications in order to keep you updated on your pair\'s location and chat messages',
+                        onGrant: () async {
+                          Navigator.pop(context);
+                          await permissionService
+                              .requestNotificationPermission();
+                        }, onDeny: () {
+                          Navigator.pop(context);
+                        });
+                  }),
               ),
             ],
           ),
