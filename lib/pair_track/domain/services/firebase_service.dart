@@ -324,8 +324,12 @@ class FirebaseGroupFunctions {
     final userPhotoUrl = user.userPhotoUrl;
     final now = DateTime.now();
 
-    // Check if the group is full
-    if (await _isGroupFull(pairName, groupCreatorEmail)) return;
+    // Check if the group is full and if the pair exists
+    if (await _isGroupFull(pairName, groupCreatorEmail) ||
+        (await _doesPairExist(pairName, groupCreatorEmail) == false)) {
+      print('Pair doesnt exist so user cant join');
+      return;
+    }
 
     // Data for the member document
     final memberData = {
@@ -470,8 +474,7 @@ class FirebaseGroupFunctions {
             'current_longitude': loc.longitude,
           });
         }
-      } else {
-      }
+      } else {}
     } catch (e) {
       if (kDebugMode) {
         print('Failed to update location: $e');
@@ -528,6 +531,17 @@ class FirebaseGroupFunctions {
   Future<bool> _isGroupFull(String pairName, String groupCreatorEmail) async {
     // Check if the group is full
     return (await checkNumOfMembersInGroup(pairName, groupCreatorEmail)) >= 2;
+  }
+
+  Future<bool> _doesPairExist(String pairName, String groupCreatorEmail) async {
+    // Check if the pair exists
+    final result = await fireStore
+        .collection('Pairs')
+        .doc(groupCreatorEmail)
+        .collection('pairs')
+        .doc(pairName)
+        .get();
+    return result.exists;
   }
 
   Future<String?> _getPhotoUrlOfGroupCreator(
