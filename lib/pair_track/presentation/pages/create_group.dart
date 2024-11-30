@@ -32,7 +32,7 @@ class _CreatePairState extends State<CreatePair> {
 
   @override
   Widget build(BuildContext context) {
-    final location = Provider.of<LocationProvider>(context);
+    final location = Provider.of<UserLocationProvider>(context);
     return PlatformScaffold(
       appBar: PlatformAppBar(
         title: const Text('Create Pair'),
@@ -69,17 +69,36 @@ class _CreatePairState extends State<CreatePair> {
                 onPressed: () {
                   if (_pairNameController.text.isNotEmpty) {
                     startLoading();
-                    firebaseService
-                        .createGroup(
-                        _pairNameController.text.trim(),
-                        context,
-                        LatLng(location.lat, location.long))
-                        .whenComplete(() {
-                      if (context.mounted) {
-                        stopLoading();
-                        Navigator.pop(context);
-                      }
-                    });
+                    try {
+                      firebaseService
+                          .createGroup(
+                          _pairNameController.text.trim(),
+                          context,
+                          LatLng(location.lat, location.long));
+                      //     .whenComplete(() {
+                      //   if (context.mounted) {
+                      //     stopLoading();
+                      //     Navigator.pop(context);
+                      //   }
+                      // });
+                    } on Exception catch (e) {
+                      showPlatformDialog(
+                        context: context,
+                        builder: (_) => PlatformAlertDialog(
+                          title: const Text('Error'),
+                          content:
+                           Text(e.toString()),
+                          actions: <Widget>[
+                            PlatformDialogAction(
+                              child: const Text('OK'),
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                            ),
+                          ],
+                        ),
+                      );
+                    }
                   } else {
                     showPlatformDialog(
                       context: context,

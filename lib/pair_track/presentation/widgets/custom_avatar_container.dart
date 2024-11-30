@@ -41,7 +41,7 @@ class _CustomAvatarContainerState extends State<CustomAvatarContainer> {
   @override
   Widget build(BuildContext context) {
     final userDetails = Provider.of<GoogleSignInService>(context);
-    final location = Provider.of<LocationProvider>(context, listen: false);
+    final location = Provider.of<UserLocationProvider>(context, listen: false);
     final memberCount =
         Provider.of<ActivePairJoinerManager>(context).numOfMembers;
 

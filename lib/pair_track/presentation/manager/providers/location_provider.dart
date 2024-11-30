@@ -11,12 +11,12 @@ import 'package:provider/provider.dart';
 
 import 'google_signin_provider.dart';
 
-class LocationProvider extends ChangeNotifier {
+class UserLocationProvider extends ChangeNotifier {
   FirebaseGroupFunctions firebaseGroupFunctions = FirebaseGroupFunctions();
   double _latitude = 0.0;
   double _longitude = 0.0;
   String locationName = '';
-  CameraPosition _cameraPosition = const CameraPosition(
+  final CameraPosition _cameraPosition = const CameraPosition(
     target: LatLng(0.0, 0.0),
     zoom: 15,
   );
@@ -84,13 +84,14 @@ class LocationProvider extends ChangeNotifier {
           notifyListeners();
         }
       });
-      location.enableBackgroundMode(enable: true);
       location.changeSettings(
-        accuracy: LocationAccuracy.high,
+        accuracy: LocationAccuracy.low,
         interval: 5000, // 5 seconds
         distanceFilter: 0, // Update on every movement
       );
-    } catch (e) {
+    } on Exception {
+      print('Error getting location');
+      return;
     }
   }
 
@@ -102,8 +103,10 @@ class LocationProvider extends ChangeNotifier {
       if (response.statusCode == 200) {
         final decodedData = jsonDecode(response.body);
         locationName = decodedData['data'][0]['label'];
+        notifyListeners();
       }
-    } on Exception {}
-    notifyListeners();
+    } on Exception {
+      return;
+    }
   }
 }

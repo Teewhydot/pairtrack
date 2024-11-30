@@ -212,7 +212,7 @@ class _PairsManagerState extends State<PairsManager>
                                         children: [
                                           group['created_by'] != userEmail
                                               ? Text('Created by: ${group['created_by']}', style: const TextStyle(color: Colors.black))
-                                              : const Text('You created this group', style: TextStyle(color: Colors.black)),
+                                              : const Text('You created this pair', style: TextStyle(color: Colors.black)),
                                           const SizedBox(width: 10),
                                           Text('${members.length} member(s)', style: const TextStyle(color: Colors.black)),
                                         ],
