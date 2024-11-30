@@ -90,7 +90,6 @@ class UserLocationProvider extends ChangeNotifier {
         distanceFilter: 0, // Update on every movement
       );
     } on Exception {
-      print('Error getting location');
       return;
     }
   }

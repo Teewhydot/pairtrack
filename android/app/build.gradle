@@ -11,9 +11,8 @@ plugins {
 android {
     namespace = "com.sirteefyapps.pairtrack"
     compileSdk = 34
-    ndkVersion = flutter.ndkVersion
-
     // Fix for latest android studio build issue
+    ndkVersion = "25.1.8937393"
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17

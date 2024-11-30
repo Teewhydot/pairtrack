@@ -7,6 +7,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:pairtrack/generated/assets.dart';
 import 'package:pairtrack/pair_track/domain/constants/helpers.dart';
 import 'package:pairtrack/pair_track/domain/services/firebase_service.dart';
+import 'package:pairtrack/pair_track/domain/services/permission_service.dart';
 import 'package:pairtrack/pair_track/presentation/manager/providers/expanded_provider.dart';
 import 'package:pairtrack/pair_track/presentation/manager/providers/google_signin_provider.dart';
 import 'package:pairtrack/pair_track/presentation/manager/providers/location_provider.dart';
@@ -69,8 +70,6 @@ class _PairTrackHomeState extends State<PairTrackHome> {
     super.initState();
     final userDetails =
         Provider.of<GoogleSignInService>(context, listen: false);
-    final location = Provider.of<UserLocationProvider>(context, listen: false);
-    location.getLocationAndUpdates(context);
     _setCreatorMarker(userDetails.userPhotoUrl);
   }
 
@@ -82,8 +81,15 @@ class _PairTrackHomeState extends State<PairTrackHome> {
     activePairMemberCount =
         Provider.of<ActivePairJoinerManager>(context).numOfMembers;
     userEmail = Provider.of<GoogleSignInService>(context).userEmail;
-
-    joinerPositionSubscription = Stream.fromFuture(
+    /// Run the getLocation function once the user has granted permission
+    final permissionService = Provider.of<PermissionService>(context);
+    if (permissionService.locationPermissionGranted &&
+        permissionService.backgroundLocationPermissionGranted) {
+      final location = Provider.of<UserLocationProvider>(context, listen: false);
+      location.getLocationAndUpdates(context);
+    }
+   if(activePairMemberCount == 2) {
+     joinerPositionSubscription = Stream.fromFuture(
       firebaseGroupFunctions.getLocationOfJoiner(
           activePairName, userEmail, activePairMemberCount == 2),
     ).listen((event) async {
@@ -91,7 +97,7 @@ class _PairTrackHomeState extends State<PairTrackHome> {
         joinerPosition = event;
       });
     });
-
+   }
     if (joinerPosition != const LatLng(0, 0)) {
       final joinerPhotoLink = await firebaseGroupFunctions.getJoinerPhotoLink(
           activePairName ?? 'test', userEmail);
@@ -104,6 +110,7 @@ class _PairTrackHomeState extends State<PairTrackHome> {
     final location = Provider.of<UserLocationProvider>(context);
     final pairManager = Provider.of<ActivePairJoinerManager>(context);
     final expanded = Provider.of<TrayExpanded>(context).isExpanded;
+    final permissionService = Provider.of<PermissionService>(context);
     setMapStyle();
     return PlatformScaffold(
       material: (context, platform) => MaterialScaffoldData(
@@ -113,39 +120,75 @@ class _PairTrackHomeState extends State<PairTrackHome> {
       body: SafeArea(
         child: Stack(
           children: [
-            location.lat != 0.0
-                ? GoogleMap(
-                    initialCameraPosition: CameraPosition(
-                      target: LatLng(location.lat, location.long),
-                      zoom: 15,
-                    ),
-                    onMapCreated: (controller) {
-                      location.mapControllerCompleter.complete(controller);
-                    },
-                    markers: {
-                      Marker(
-                        markerId: const MarkerId('creator'),
-                        position: LatLng(location.lat, location.long),
-                        icon: creatorMarker ?? BitmapDescriptor.defaultMarker,
+            !permissionService.locationPermissionGranted ||
+                    !permissionService.backgroundLocationPermissionGranted
+                ? Positioned.fill(
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          permissionService.isLocationPermissionGranted
+                              ? Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: const Text(
+                                    'Please grant background location permission'),
+                              )
+                              : Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: const Text('Please grant the necessary permissions required for PairTrack to work'),
+                              ),
+                          PlatformElevatedButton(
+                            child: const Text('Grant permission'),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                platformPageRoute(
+                                  context: context,
+                                  builder: (context) =>
+                                      const PermissionsScreen(),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
                       ),
-                      if (activePairMemberCount == 2 &&
-                          activePairName!.isNotEmpty)
-                        Marker(
-                          markerId: const MarkerId('joiner'),
-                          position: joinerPosition,
-                          icon: joinerMarker ?? BitmapDescriptor.defaultMarker,
-                        ),
-                    },
-                    mapType: MapType.normal,
+                    ),
                   )
-                : Center(
-                    child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      PlatformCircularProgressIndicator(),
-                      Text('Getting device location')
-                    ],
-                  )),
+                : location.lat != 0.0
+                    ? GoogleMap(
+                        initialCameraPosition: CameraPosition(
+                          target: LatLng(location.lat, location.long),
+                          zoom: 15,
+                        ),
+                        onMapCreated: (controller) {
+                          location.mapControllerCompleter.complete(controller);
+                        },
+                        markers: {
+                          Marker(
+                            markerId: const MarkerId('creator'),
+                            position: LatLng(location.lat, location.long),
+                            icon:
+                                creatorMarker ?? BitmapDescriptor.defaultMarker,
+                          ),
+                          if (activePairMemberCount == 2 &&
+                              activePairName!.isNotEmpty)
+                            Marker(
+                              markerId: const MarkerId('joiner'),
+                              position: joinerPosition,
+                              icon: joinerMarker ??
+                                  BitmapDescriptor.defaultMarker,
+                            ),
+                        },
+                        mapType: MapType.normal,
+                      )
+                    : Center(
+                        child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          PlatformCircularProgressIndicator(),
+                          Text('Getting device location')
+                        ],
+                      )),
             Positioned(
               top: 0,
               child: Container(
