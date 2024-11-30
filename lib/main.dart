@@ -16,7 +16,6 @@ import 'package:pairtrack/pair_track/presentation/manager/providers/location_pro
 import 'package:pairtrack/pair_track/presentation/manager/providers/pair_manager.dart';
 import 'package:pairtrack/pair_track/presentation/manager/providers/selected_pair_manager.dart';
 import 'package:pairtrack/pair_track/presentation/pages/auth.dart';
-import 'package:pairtrack/pair_track/presentation/pages/no_internet_screen.dart';
 import 'package:pairtrack/pair_track/presentation/pages/pair_track_home.dart';
 
 import 'package:provider/provider.dart';

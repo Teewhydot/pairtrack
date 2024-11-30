@@ -100,11 +100,6 @@ class _PermissionsScreenState extends State<PermissionsScreen> {
               ),
             ],
           ),
-          PlatformElevatedButton(
-              child: const Text('Continue'),
-              onPressed: () {
-                Navigator.pop(context);
-              }),
         ],
       ),
     );
