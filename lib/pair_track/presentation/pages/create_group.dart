@@ -71,16 +71,16 @@ class _CreatePairState extends State<CreatePair> {
                     startLoading();
                     try {
                       firebaseService
-                          .createGroup(
+                          .createPair(
                           _pairNameController.text.trim(),
                           context,
-                          LatLng(location.lat, location.long));
-                      //     .whenComplete(() {
-                      //   if (context.mounted) {
-                      //     stopLoading();
-                      //     Navigator.pop(context);
-                      //   }
-                      // });
+                          LatLng(location.lat, location.long))
+                          .whenComplete(() {
+                        if (context.mounted) {
+                          stopLoading();
+                          Navigator.pop(context);
+                        }
+                      });
                     } on Exception catch (e) {
                       showPlatformDialog(
                         context: context,

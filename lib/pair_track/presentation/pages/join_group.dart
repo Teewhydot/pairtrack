@@ -110,17 +110,17 @@ class _JoinPairState extends State<JoinPair> {
 
                             try {
                               firebaseService
-                                  .joinGroup(
+                                  .joinPair(
                                       _codeController.text.trim(),
                                       _emailController.text.trim(),
                                       context,
-                                      LatLng(location.lat, location.long));
-                              //     .whenComplete(() {
-                              //   if (context.mounted) {
-                              //     stopLoading();
-                              //     Navigator.pop(context);
-                              //   }
-                              // });
+                                      LatLng(location.lat, location.long))
+                                  .whenComplete(() {
+                                if (context.mounted) {
+                                  stopLoading();
+                                  Navigator.pop(context);
+                                }
+                              });
                             } on PairFullException catch (e) {
                               showCustomPlatformDialog(
                                   e.message, 'Error', context);

@@ -280,7 +280,7 @@ import 'package:provider/provider.dart';
 class FirebaseGroupFunctions {
   final fireStore = FirebaseFirestore.instance;
 
-  Future<void> createGroup(
+  Future<void> createPair(
       String pairName, BuildContext context, LatLng location) async {
     try {
       final user = Provider.of<GoogleSignInService>(context, listen: false);
@@ -321,7 +321,7 @@ class FirebaseGroupFunctions {
     }
   }
 
-  Future<void> joinGroup(String pairName, String groupCreatorEmail,
+  Future<void> joinPair(String pairName, String groupCreatorEmail,
       BuildContext context, LatLng location) async {
     try {
       final user = Provider.of<GoogleSignInService>(context, listen: false);
@@ -387,7 +387,7 @@ class FirebaseGroupFunctions {
     }
   }
 
-  Future<void> leaveGroup(
+  Future<void> leavePair(
       String pairName, String groupCreatorEmail, BuildContext context) async {
     final user = Provider.of<GoogleSignInService>(context, listen: false);
     final userEmail = user.userEmail;
@@ -411,7 +411,7 @@ class FirebaseGroupFunctions {
         .delete();
   }
 
-  Future<void> deleteGroup(String pairName, BuildContext context) async {
+  Future<void> deletePair(String pairName, BuildContext context) async {
     final user = Provider.of<GoogleSignInService>(context, listen: false);
     final userEmail = user.userEmail;
 

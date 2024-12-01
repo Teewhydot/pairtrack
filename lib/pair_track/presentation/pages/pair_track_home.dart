@@ -81,23 +81,25 @@ class _PairTrackHomeState extends State<PairTrackHome> {
     activePairMemberCount =
         Provider.of<ActivePairJoinerManager>(context).numOfMembers;
     userEmail = Provider.of<GoogleSignInService>(context).userEmail;
+
     /// Run the getLocation function once the user has granted permission
     final permissionService = Provider.of<PermissionService>(context);
     if (permissionService.locationPermissionGranted &&
         permissionService.backgroundLocationPermissionGranted) {
-      final location = Provider.of<UserLocationProvider>(context, listen: false);
+      final location =
+          Provider.of<UserLocationProvider>(context, listen: false);
       location.getLocationAndUpdates(context);
     }
-   if(activePairMemberCount == 2) {
-     joinerPositionSubscription = Stream.fromFuture(
-      firebaseGroupFunctions.getLocationOfJoiner(
-          activePairName, userEmail, activePairMemberCount == 2),
-    ).listen((event) async {
-      setState(() {
-        joinerPosition = event;
+    if (activePairMemberCount == 2) {
+      joinerPositionSubscription = Stream.fromFuture(
+        firebaseGroupFunctions.getLocationOfJoiner(
+            activePairName, userEmail, activePairMemberCount == 2),
+      ).listen((event) async {
+        setState(() {
+          joinerPosition = event;
+        });
       });
-    });
-   }
+    }
     if (joinerPosition != const LatLng(0, 0)) {
       final joinerPhotoLink = await firebaseGroupFunctions.getJoinerPhotoLink(
           activePairName ?? 'test', userEmail);
@@ -129,14 +131,15 @@ class _PairTrackHomeState extends State<PairTrackHome> {
                         children: [
                           permissionService.isLocationPermissionGranted
                               ? Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: const Text(
-                                    'Please grant background location permission'),
-                              )
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: const Text(
+                                      'Please grant background location permission'),
+                                )
                               : Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: const Text('Please grant the necessary permissions required for PairTrack to work'),
-                              ),
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: const Text(
+                                      'Please grant the necessary permissions required for PairTrack to work'),
+                                ),
                           PlatformElevatedButton(
                             child: const Text('Grant permission'),
                             onPressed: () {
@@ -260,12 +263,21 @@ class _PairTrackHomeState extends State<PairTrackHome> {
                           child: TopAction(
                             icon: const Icon(Icons.chat),
                             onClick: () {
-                              Navigator.push(
-                                context,
-                                platformPageRoute(
-                                  context: context,
-                                  builder: (context) =>
-                                      const PermissionsScreen(),
+                              showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title:
+                                  const Text('Under development'),
+                                  content: const Text(
+                                      'This feature is currently under development'),
+                                  actions: [
+                                    PlatformElevatedButton(
+                                      child: const Text('OK'),
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                    ),
+                                  ],
                                 ),
                               );
                             },

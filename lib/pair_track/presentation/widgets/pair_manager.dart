@@ -177,7 +177,7 @@ class _PairsManagerState extends State<PairsManager>
                                             child: const Text('Delete'),
                                             onPressed: () {
                                               firebaseGroupFunctions
-                                                  .leaveGroup(group.id, group['created_by'], context)
+                                                  .leavePair(group.id, group['created_by'], context)
                                                   .whenComplete(() {
                                                 if (context.mounted) Navigator.pop(context);
                                               });
