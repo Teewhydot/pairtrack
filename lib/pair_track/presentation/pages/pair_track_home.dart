@@ -56,11 +56,13 @@ class _PairTrackHomeState extends State<PairTrackHome> {
   }
 
   Future<void> setMapStyle() async {
-    if (context.isDarkMode) {
-      mapStyle = await rootBundle.loadString(Assets.assetsMapThemeNight);
-      setState(() {});
-    } else {
-      mapStyle = null;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final newStyle = isDark 
+        ? await rootBundle.loadString(Assets.assetsMapThemeNight)
+        : null;
+    
+    if (mounted && mapStyle != newStyle) {
+      mapStyle = newStyle;
       setState(() {});
     }
   }
@@ -113,7 +115,9 @@ class _PairTrackHomeState extends State<PairTrackHome> {
     final pairManager = Provider.of<ActivePairJoinerManager>(context);
     final expanded = Provider.of<TrayExpanded>(context).isExpanded;
     final permissionService = Provider.of<PermissionService>(context);
-    setMapStyle();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setMapStyle();
+    });
     return PlatformScaffold(
       material: (context, platform) => MaterialScaffoldData(
         extendBody: true,
@@ -166,6 +170,7 @@ class _PairTrackHomeState extends State<PairTrackHome> {
                         onMapCreated: (controller) {
                           location.mapControllerCompleter.complete(controller);
                         },
+                        style: mapStyle,
                         markers: {
                           Marker(
                             markerId: const MarkerId('creator'),
@@ -183,6 +188,19 @@ class _PairTrackHomeState extends State<PairTrackHome> {
                             ),
                         },
                         mapType: MapType.normal,
+                        compassEnabled: false,
+                        mapToolbarEnabled: false,
+                        myLocationButtonEnabled: false,
+                        zoomControlsEnabled: false,
+                        indoorViewEnabled: false,
+                        trafficEnabled: false,
+                        buildingsEnabled: false,
+                        myLocationEnabled: false,
+                        rotateGesturesEnabled: false,
+                        scrollGesturesEnabled: true,
+                        zoomGesturesEnabled: true,
+                        tiltGesturesEnabled: false,
+                        minMaxZoomPreference: const MinMaxZoomPreference(10, 20),
                       )
                     : Center(
                         child: Column(

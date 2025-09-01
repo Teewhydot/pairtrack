@@ -19,7 +19,6 @@ class PermissionDialog extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
         borderRadius: BorderRadius.only(
           topLeft: Radius.circular(20),
           topRight: Radius.circular(20),
@@ -60,7 +59,11 @@ class PermissionDialog extends StatelessWidget {
   }
 }
 
-void showPermissionDialog(BuildContext context, {required String permission, required String explanation, required VoidCallback onGrant, required VoidCallback onDeny}) {
+void showPermissionDialog(BuildContext context,
+    {required String permission,
+    required String explanation,
+    required VoidCallback onGrant,
+    required VoidCallback onDeny}) {
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
